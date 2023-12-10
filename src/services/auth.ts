@@ -1,15 +1,17 @@
-import { Request } from 'express';
+import { Request } from "express";
 
-import { PrismaClient } from '@prisma/client';
-import { User  } from '../interfaces/body.interface';
-import { script, verified } from '../utils/bscrypt.handles';
-import { generateToken } from '../utils/jwt.handles';
+import { PrismaClient } from "@prisma/client";
+import { User } from "../interfaces/body.interface";
+import { script, verified } from "../utils/bscrypt.handles";
+import { generateToken } from "../utils/jwt.handles";
+import { resendEmail } from "../emails/auth.email";
+import { string } from "zod";
+//import { sendmail } from "../emails/auth.email";
 
 const prisma = new PrismaClient();
 
 export const registerNewUser = async (req: Request) => {
   try {
-
     const existingUser = await prisma.user.findUnique({
       where: { email: req.body.email },
     });
@@ -17,52 +19,55 @@ export const registerNewUser = async (req: Request) => {
     if (existingUser) {
       return "El usuario ya existe";
     }
-    const passwordhash = await script(req.body.password)
+    //encripta la contraseña
+    const passwordhash = await script(req.body.password);
 
-    const newUser : User = await prisma.user.create({
-      data: { email: req.body.email, password: passwordhash, name: req.body.name, lastname: req.body.lastname}
+    //crea el usuario
+    const newUser: User = await prisma.user.create({
+      data: {
+        email: req.body.email,
+        password: passwordhash,
+        name: req.body.name,
+        lastname: req.body.lastname,
+      },
     });
-    
+    //genera el token
+    const token = generateToken({ id: newUser.id });
 
-   const token = generateToken({ id: newUser.id })
-    const data ={
-      token, 
-      user : newUser
-    }
-    return data
+    //envia un correo de Biemvenida
+    //sendmail(req,);
+    await resendEmail(req)
+    const data = { message: "Usuario", newUser, token };
 
-
-    
+    return data;
   } catch (error) {
     console.error(error);
-    throw error; // Re-lanza el error para que pueda ser manejado en el nivel superior
   } finally {
     await prisma.$disconnect(); // Invoca la función $disconnect correctamente
   }
 };
 
-
-export const login =async(req : Request)=>{
+export const login = async (req: Request) => {
+  
   try {
-    const correct = await prisma.user.findUnique({where: {email : req.body.email}})
-  if(!correct){
-    return "El usuario no existe"
-  }
-  const isCorrect = await verified(req.body.password, correct.password)
-  if(!isCorrect){
-    return "Contraseña incorrecta"
-    
-  }
-  const token = generateToken({ id: correct.id })
-  const data ={
-    token,
-    correct
-  }
-  return data
-    
+    const correct = await prisma.user.findUnique({
+      where: { email: req.body.email },
+    });
+    if (!correct) {
+      return "El usuario no existe";
+    }
+    const isCorrect = await verified(req.body.password, correct.password);
+    if (!isCorrect) {
+      return "Contraseña incorrecta";
+    }
+    const token = generateToken({ id: correct.id });
+
+    const data = {
+      token,
+      correct,
+    };
+    return data;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-  
-  
-}
+};

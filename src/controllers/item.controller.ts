@@ -25,9 +25,9 @@ export const createItem = async (req: Request, res: Response) => {
 
 export const getAllItems = async (req: Request, res: Response) => {
   try {
-    const item = await getItems(req);
-    res.status(200).json(item);
-    console.log("solicitado");
+    console.log(req.user)
+    res.send('hola items')
+    
   } catch (e) {
     console.log(e);
 

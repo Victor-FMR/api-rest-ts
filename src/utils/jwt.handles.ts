@@ -8,7 +8,11 @@ export const generateToken = (id: any) => {
 };
 
 export const verifiedToken = (token: string) => {
-  const isOk = jwt.verify(token, SECRET_KEY as string);
+  try {
+    const isOk = jwt.verify(token, SECRET_KEY as string);
 
-  return isOk;
+    return isOk;
+  } catch (error) {
+    console.error("error al verificar el token ", error);
+  }
 };

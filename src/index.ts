@@ -1,6 +1,10 @@
+
 import app from "./app";
 import { PORT } from "./config";
+import connectToDB from "./db";
 
+//mongo
+connectToDB();
 app.listen(PORT, () => {
-  console.log(`Puerto abierto en  ${PORT}`);
+  console.log(`--- PUERTO OPEN IN ${PORT} ---`);
 });

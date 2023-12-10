@@ -1,14 +1,34 @@
-import { Router} from "express";
-import { logMiddleware } from "../middlewares/log";
-import { loginCtrl, registerCtrl } from "../controllers/auth.controller";
+import { Request, Response, Router } from "express";
 
+import {
+  loginCtrl,
+  redirectCtrl,
+  registerCtrl,
+} from "../controllers/auth.controller";
+import {
+  registerSchema,
+  loginSchema,
+} from "../middlewares/validator.middleware";
+
+import passport from "passport";
 
 const router = Router();
 
+router.post("/Register", registerSchema, registerCtrl);
 
-router.post('/register',  registerCtrl)
+router.post("/Login", loginSchema, loginCtrl);
 
-router.post('/login',loginCtrl )
+router.get("/google", passport.authenticate("google"));
 
+router.get("/google/redirect",passport.authenticate("google", { successRedirect: "/dashboard",failureRedirect: "/",}));
+// Ruta para iniciar el proceso de autenticación con Microsoft
+router.get("/discord",passport.authenticate("discord"));
 
-export default router
+// Ruta de retorno después de la autenticación con Microsoft
+router.get("/discord/redirect",passport.authenticate("discord",{ successRedirect: '/dashboard',failureRedirect: '/'}));
+
+router.get('/microsoft', passport.authenticate('microsoft',{prompt: 'select_account',}))
+
+router.get('/microsoft/redirect', passport.authenticate('microsoft',{successRedirect: '/items',failureRedirect: '/dashboard',}))
+
+export default router;
