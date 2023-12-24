@@ -1,11 +1,14 @@
 import { Profile, Strategy } from "passport-discord";
 import passport from "passport";
 import userDiscord from "../models/user.discord";
-import { json } from "express";
+
+
+
 
 passport.serializeUser((userDiscord: any, done) => {
+  console.log(userDiscord.id)
   done(null, userDiscord.id);
-  console.log("serialUser", userDiscord);
+ 
 });
 
 passport.deserializeUser(async (id: string, done) => {
@@ -23,19 +26,19 @@ passport.use(
     {
       clientID: process.env.DISCORD_CLIENT_ID || "",
       clientSecret: process.env.DISCORD_CLIENT_SECRET || "",
-      callbackURL: "http://localhost:7777/auth/discord/redirect",
+      callbackURL: "http://localhost:9999/auth/discord/redirect",
       scope: ["identify", "email", "guilds"],
     },
     async (
       accessToken: string,
       refreshToken: string,
       profile: Profile,
-      done: any
+      done
     ) => {
       try {
         const found = await userDiscord.findOne({ discordId: profile.id });
-        //const data = { mesagge:'LOGIN',username: found?.username, email: found?.email };
-        if (found) //console.log(data);
+       // const data = { mesagge:'LOGIN',username: found?.username, email: found?.email };
+        if (found) 
         return done(null, found);
         const newUser = new userDiscord({
           discordId: profile.id,
@@ -47,7 +50,7 @@ passport.use(
         console.log("newUser", newUser);
         return done(null, newUser);
       } catch (error) {
-        done(error, null);
+        done( null);
         console.error(error);
       }
     }

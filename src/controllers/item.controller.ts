@@ -26,7 +26,7 @@ export const createItem = async (req: Request, res: Response) => {
 export const getAllItems = async (req: Request, res: Response) => {
   try {
     console.log(req.user)
-    res.send('hola items')
+    res.render('items.ejs')
     
   } catch (e) {
     console.log(e);

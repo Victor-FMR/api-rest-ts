@@ -1,10 +1,12 @@
 import { Router} from "express";
 import { createItem, deleteItem, getAllItems, getItemById, updateItem } from "../controllers/item.controller";
+import passport from "passport";
+import { isAuthorized } from "../utils/authorized";
 
 const router = Router();
 
 
-router.get('/items', getAllItems )
+router.get('/items', isAuthorized,getAllItems )
 
 router.post('/item', createItem)
 

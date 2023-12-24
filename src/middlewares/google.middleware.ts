@@ -26,7 +26,7 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID || "",
       clientSecret: GOOGLE_CLIENT_SECRET || "",
-      callbackURL: "http://localhost:7777/auth/google/redirect",
+      callbackURL: "http://localhost:9999/auth/google/redirect",
       scope : ['profile','email']
     },
     async(
@@ -49,7 +49,7 @@ passport.use(
 
         });
         await newUser.save()
-        console.log(newUser)
+       // console.log(newUser)
         done(null, newUser);
       } catch (error) {
         console.log("Error in Google Auth", error);
